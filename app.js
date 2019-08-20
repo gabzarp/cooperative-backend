@@ -1,22 +1,19 @@
 const logger = require('koa-logger');
 const Koa = require('koa');
-const _ = require('koa-route');
+const Router = require('koa-router');
 const bodyParser = require('koa-bodyparser')
-const mysql = require('mysql');
+const mongo = require('koa-mongo')
 const app = new Koa();
+
+const router = new Router();
+
+app.use(mongo())
 
 app.use(bodyParser());
 
-const connection = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : '',
-    database : 'cooperative'
-})
-connection.connect();
-
 app.use(async (ctx, next) => {
     try {
+        ctx.db === ctx.mongo.db('cooperative');
         await next();
     } catch (err) {
         ctx.status = err.status || 500;
@@ -33,14 +30,21 @@ app.use(logger());
 
 
 const user = {
-    createUser: (ctx) => {
-        let user = ctx.request.body;
-        console.log(user)
-        connection.query('INSERT INTO user(name, email, password) VALUES("' + user.name + '", "' + user.email + '", "' + user.password + '");');
+    getAllUsers: async (ctx) => {
+        const result = await ctx.db.collection('user').find().toArray()
+        ctx.body = result;
         ctx.status = 200;
-        ctx.body = user;
+    },
+    createUser: (ctx) =>{
+        console.log(ctx.request.body)
+        const result = ctx.db.collection('user').insertOne(ctx.request.body);
+        ctx.body = result;
+        ctx.status = 200;
     }
 }
-app.use(_.post('/user', user.createUser))
+router.get('/user', user.getAllUsers)
+      .post('/user', user.createUser);
+
+app.use(router.routes());
 
 app.listen(3000);

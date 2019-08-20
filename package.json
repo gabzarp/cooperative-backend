@@ -20,8 +20,9 @@
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
     "koa-logger": "^3.2.1",
-    "koa-route": "^3.2.0",
+    "koa-mongo": "^1.8.1",
     "koa-router": "^7.4.0",
+    "mongodb": "^3.3.0",
     "mysql": "^2.17.1",
     "nodemon": "^1.19.1"
   }
