@@ -1,49 +1,46 @@
 const logger = require('koa-logger');
 const Koa = require('koa');
 const Router = require('koa-router');
-const bodyParser = require('koa-bodyparser')
-const mongo = require('koa-mongo')
+const bcrypt = require('bcrypt');
+const bodyParser = require('koa-bodyparser');
+const pool = require('./db');
 const app = new Koa();
 
 const router = new Router();
 
-app.use(mongo())
-
 app.use(bodyParser());
 
-app.use(async (ctx, next) => {
-    try {
-        ctx.db === ctx.mongo.db('cooperative');
-        await next();
-    } catch (err) {
-        ctx.status = err.status || 500;
-        ctx.body = err.message;
-        ctx.app.emit('error', err, ctx);
-    }
-});
-
-app.on('error', (err, ctx) => {
-    console.log(err)
-});
 
 app.use(logger());
 
 
 const user = {
-    getAllUsers: async (ctx) => {
-        const result = await ctx.db.collection('user').find().toArray()
-        ctx.body = result;
-        ctx.status = 200;
+    createUser: async (ctx) =>{
+        await bcrypt.hash(ctx.request.body.password, 10)
+        .then(async (hash)=>{
+            await pool.query( "INSERT INTO USER (name,email,password) VALUE (?,?,?)", [ctx.request.body.name, ctx.request.body.email, hash])
+            .then(()=>{
+                ctx.status = 200;
+                ctx.body = ctx.request.body;
+            })
+        })
+        .catch(err =>{ctx.body = 'error: ' + err; ctx.status = 500;})
     },
-    createUser: (ctx) =>{
-        console.log(ctx.request.body)
-        const result = ctx.db.collection('user').insertOne(ctx.request.body);
-        ctx.body = result;
-        ctx.status = 200;
+    login: async (ctx) =>{
+        await pool.query("SELECT password FROM user where email = ?", [ctx.request.body.email])
+        .then(async (results)=>{
+            await bcrypt.compare(ctx.request.body.password, results[0].password)
+            .then(res=>{
+                console.log(res)
+                ctx.body = res;
+                ctx.status = 200;
+            })
+        })
+        .catch(err =>{ctx.body = 'error: ' + err; ctx.status = 500;})
     }
 }
-router.get('/user', user.getAllUsers)
-      .post('/user', user.createUser);
+router.post('/user',  user.createUser)
+      .get('/user', user.login);
 
 app.use(router.routes());
 
