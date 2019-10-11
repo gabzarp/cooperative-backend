@@ -13,7 +13,7 @@ app.use(logger());
 
 router.post('/member',  user.createMember)
       .post('/hirer',  user.createHirer)
-      .get('/user', user.login);
+      .get('/login', user.login);
 
 app.use(router.routes());
 

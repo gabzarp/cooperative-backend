@@ -55,9 +55,12 @@ const user = {
         })   
     },
     login: async (ctx) =>{
-        await pool.query("SELECT password FROM user where email = ?", [ctx.request.body.email])
+        await pool
+        .then((p)=>{
+            return p.query("SELECT password FROM user where email = ?", [ctx.request.body.email])
+        })
         .then((results)=>{
-            return bcrypt.compare(ctx.request.body.password, results[0].password)  
+            return bcrypt.compare(ctx.request.body.password, results[0].password);
         })
         .then(res=>{
                 ctx.body = res;
