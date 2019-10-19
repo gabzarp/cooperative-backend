@@ -39,7 +39,7 @@ const evaluation = {
     },
     updateEvaluation: async (ctx) => {
         await pool.then((p)=>{
-            return p.query("UPDATE evaluation INNER JOIN member ON user.id = member.user_id set member.portfolio = ?, where user_id = ?;", [ctx.request.body.name,ctx.request.body.email,ctx.request.body.cpf,ctx.request.body.approved,ctx.request.body.behavorial,ctx.request.body.portfolio,ctx.params.id])
+            return p.query("UPDATE evaluation INNER JOIN member ON member.id = evaluation.user_id set evaluation.evaluation = ?, evaluation.date = ? where user_id = ?;", [ctx.request.body.evaluation,ctx.request.body.date,ctx.params.id])
         })
         .then(()=>{
             ctx.body = ctx.request.body;
