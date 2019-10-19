@@ -13,7 +13,7 @@ app.use(bodyParser());
 app.use(logger());
 
 router.get('/login', user.login)
-      .delete('/user:id', user.deleteUser)
+      .delete('/user/:id', user.deleteUser)
 
       .post('/member',  member.createMember)
       .get('/member/:id', member.getMemberById)

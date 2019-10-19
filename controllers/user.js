@@ -18,7 +18,7 @@ const user = {
     },
     deleteUser: async (ctx) => {
         await pool.then((p)=>{
-            return query("UPDATE user user.active = 0 where user.id = ?", [[ctx.params.id]])
+            return p.query("UPDATE user user.active = 0 where user.id = ?", [[ctx.params.id]])
         })
         .then(()=>{
             ctx.body = "User deleted"
