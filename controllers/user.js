@@ -66,7 +66,8 @@ const member = {
         .catch(err =>{ctx.body = 'error: ' + err; ctx.status = 500;})
     },
     updateMember: async (ctx) => {
-        await pool.then((p)=>{
+        await pool
+        .then((p)=>{
             return p.query("UPDATE user INNER JOIN member ON user.id = member.user_id set user.name = ? user.email = ?, member.cpf = ?, member.approved = ?, member.behavorial = ?, member.portfolio = ?, where user_id = ?;", [ctx.request.body.name,ctx.request.body.email,ctx.request.body.cpf,ctx.request.body.approved,ctx.request.body.behavorial,ctx.request.body.portfolio,ctx.params.id])
         })
         .then(()=>{
@@ -84,14 +85,14 @@ const hirer = {
             return pool;
         })
         .then(function(p){   
-            return  p.getConnection()   
+            return  p.getConnection();
         })
         .then(conn =>{
             connection = conn;
             return connection.query( "START TRANSACTION; INSERT INTO USER (name,email,password) VALUE (?,?,?)", [ctx.request.body.name, ctx.request.body.email, h]);
         })
         .then((results)=>{
-            connection.query("INSERT INTO HIRER (cnpj, user_id) VALUE (?,?); COMMIT", [ctx.request.body.cnpj, results[1].insertId ]);
+            connection.query("INSERT INTO HIRER (cnpj, user_id) VALUE (?,?); COMMIT;", [ctx.request.body.cnpj, results[1].insertId ]);
             connection.release();
             ctx.body = ctx.request.body;
             ctx.status = 200;
@@ -106,7 +107,7 @@ const hirer = {
     getHirerById: async (ctx) =>{
         await pool
         .then((p)=>{
-            return p.query("SELECT user.name, user.email, hirer.cnpj from user inner join hirer ON hirer.user_id = user.id where user.id = ? ;", [ctx.params.id])
+            return p.query("SELECT user.name, user.email, hirer.cnpj from user inner join hirer ON hirer.user_id = user.id where hirer.id = ? ;", [ctx.params.id])
         })
         .then((results)=>{
             ctx.body = results[0];
