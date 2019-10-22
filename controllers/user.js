@@ -106,7 +106,7 @@ const hirer = {
     getHirerById: async (ctx) =>{
         await pool
         .then((p)=>{
-            return p.query("SELECT user.name, user.email, member.cpf, member.approved, member.behavorial, member.portfolio from user inner join member ON member.user_id = user.id where user.id = ? ;", [ctx.params.id])
+            return p.query("SELECT user.name, user.email, hirer.cpf, hirer.approved, hirer.behavorial, hirer.portfolio from user inner join hirer ON hirer.user_id = user.id where user.id = ? ;", [ctx.params.id])
         })
         .then((results)=>{
             ctx.body = results[0];
