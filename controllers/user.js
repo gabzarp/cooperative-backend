@@ -13,7 +13,7 @@ const user = {
         .then(res=>{
                 ctx.body = res;
                 ctx.status = 200;
-            })
+        })
         .catch(err =>{ctx.body = 'error: ' + err; ctx.status = 500;})
     },
     deleteUser: async (ctx) => {
@@ -42,11 +42,13 @@ const member = {
             return connection.query( "START TRANSACTION; INSERT INTO USER (name,email,password) VALUE (?,?,?)", [ctx.request.body.name, ctx.request.body.email, h]);
         })
         .then((results)=>{
-            connection.query("INSERT INTO MEMBER (cpf, user_id) VALUE (?,?); COMMIT", [ctx.request.body.cpf, results[1].insertId ]);
+            return connection.query("INSERT INTO MEMBER (cpf, user_id) VALUE (?,?); COMMIT", [ctx.request.body.cpf, results[1].insertId ]);
+        })
+        .then(()=>{
             connection.release();
             ctx.status = 200;
             ctx.body = ctx.request.body;
-        })
+        })  
         .catch(async (err)=>{
             connection.query("ROLLBACK"); 
             connection.release(); 
@@ -92,11 +94,13 @@ const hirer = {
             return connection.query( "START TRANSACTION; INSERT INTO USER (name,email,password) VALUE (?,?,?)", [ctx.request.body.name, ctx.request.body.email, h]);
         })
         .then((results)=>{
-            connection.query("INSERT INTO HIRER (cnpj, user_id) VALUE (?,?); COMMIT;", [ctx.request.body.cnpj, results[1].insertId ]);
+            return connection.query("INSERT INTO HIRER (cnpj, user_id) VALUE (?,?); COMMIT;", [ctx.request.body.cnpj, results[1].insertId ])
+        })
+        .then(()=>{
             connection.release();
             ctx.body = ctx.request.body;
             ctx.status = 200;
-        })
+        })  
         .catch((err)=>{
             connection.query("ROLLBACK"); 
             connection.release(); 
